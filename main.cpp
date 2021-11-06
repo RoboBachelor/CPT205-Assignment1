@@ -37,10 +37,12 @@ void ChangeSize(int w, int h) {
 }
 
 void mouseCallback(int button, int state, int x, int y) {
+	// Detect for left click
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+		// Coordinate translation from screen to the world.
 		float cx = (float)x / window_w * width - width / 2;
 		float cy = -(float)y / window_h * height + height / 2;
-		// Push back the new firework with random location, color and size into the firework list.
+		// Push back the new firework with clicked position into the firework list.
 		fireworks.push_back(Firework(cx, cy, 500 + getRand(800), getRand(360)));
 	}
 }
@@ -48,22 +50,29 @@ void mouseCallback(int button, int state, int x, int y) {
 void newFireworkTimerCallback(int value) {
 	// Push back the new firework with random location, color and size into the firework list.
 	fireworks.push_back(Firework(getRand(width) - width / 2, 60 + getRand(300), 500 + getRand(800), getRand(360)));
-
+	// Register this timer callback with a random period.
 	glutTimerFunc(getRand(3000), newFireworkTimerCallback, value + 1);
 }
 
 void updateMatrixTimerCallback(int value) {
+	// Display from 2006 to 2021 on the matrix.
 	if (value < 16) {
 		dataRegister = value;
 		ballMatrix.setTarget( (float(*)[MATRIX_W]) weight_16numbers[MATRIX_H * value]);
 		glutTimerFunc(1500, updateMatrixTimerCallback, value + 1);
 	}
+
+	// Register the firework timer.
+	// Slowdown the dancing speed of the matrix.
 	if(value == 16) {
 		dataRegister = value;
 		ballMatrix.negativeWeights = false;
 		ballMatrix.updateRate = 100;
 		glutTimerFunc(0, newFireworkTimerCallback, 1);
 	}
+
+	// Display two patterns alternately
+	// Switch every four seconds
 	if (value >= 16) {
 		if (value & 1) {
 			ballMatrix.setTarget(weight_15th);
@@ -77,7 +86,7 @@ void updateMatrixTimerCallback(int value) {
 
 void newFrameTimerCallback(int value) {
 
-	// Update the next state for all fireworks that are still present.
+	// Update the next state for all fireworks which are still present.
 	// Delete the firework from the list if the current firework is lazy deleted.
 	for (auto it = fireworks.begin(); it != fireworks.end();) {
 		if (!(*it).nextState()) {
@@ -91,6 +100,7 @@ void newFrameTimerCallback(int value) {
 	// Update the next frame of the ball matrix
 	ballMatrix.nextState();
 
+	// Append 4 new values from the data register to the oscilloscopes.
 	for (int i = 0; i < 4; ++i) {
 		oscilloscopes[i].append((dataRegister >> i) & 1);
 	}
