@@ -16,10 +16,12 @@ static GLfloat xRot = 0.0f;
 static GLfloat yRot = 0.0f;
 
 static int window_width = 1280, window_height = 720;
+static int dataRegister = 0;
 
 std::list<Firework> fireworks;
 
 BallMatrix ballMatrix;
+Oscilloscope oscilloscopes[4];
 
 // Change the view volume and viewport. This is called when the window is resized.
 void ChangeSize(int w, int h) {
@@ -35,28 +37,6 @@ void ChangeSize(int w, int h) {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }
-
-// Setting up lighting and material parameters for enhanced rendering effect.
-// This topic will be covered later on in the module so please skip this for now.
-void SetupRC() {
-	// Light parameters and coordinates
-	GLfloat whiteLight[] = { 0.45f, 0.45f, 0.45f, 1.0f };
-	GLfloat sourceLight[] = { 0.25f, 0.25f, 0.25f, 1.0f };
-	GLfloat lightPos[] = { -50.f, 25.0f, 250.0f, 0.0f };
-	glEnable(GL_DEPTH_TEST); // Hidden surface removal
-	glEnable(GL_LIGHTING); // Enable lighting
-	// Setup and enable light 0
-	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, whiteLight);
-	glLightfv(GL_LIGHT0, GL_AMBIENT, sourceLight);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, sourceLight);
-	glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
-	glEnable(GL_LIGHT0);
-	glEnable(GL_COLOR_MATERIAL); // Enable colour tracking
-	// Set material properties to follow glColor values
-	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Black background
-}
-
 
 void keyboardCallback(unsigned char key, int x, int y) {// keyboard interaction
 	if (key == 'm') {
@@ -94,10 +74,12 @@ void newFireworkTimerCallback(int value) {
 
 void updateMatrixTimerCallback(int value) {
 	if (value < 16) {
+		dataRegister = value;
 		ballMatrix.setTarget( (float(*)[MATRIX_W]) weight_16numbers[MATRIX_H * value]);
 		glutTimerFunc(1500, updateMatrixTimerCallback, value + 1);
 	}
 	if(value == 16) {
+		dataRegister = value;
 		ballMatrix.negativeWeights = false;
 		ballMatrix.updateRate = 100;
 		glutTimerFunc(0, newFireworkTimerCallback, 1);
@@ -129,8 +111,12 @@ void newFrameTimerCallback(int value) {
 	// Update the next frame of the ball matrix
 	ballMatrix.nextState();
 
+	for (int i = 0; i < 4; ++i) {
+		oscilloscopes[i].append((dataRegister >> i) & 1);
+	}
+
 	glutPostRedisplay(); // force OpenGL to redraw the current window
-	glutTimerFunc(TIME_INC, newFrameTimerCallback, value + 1);
+	glutTimerFunc(TIME_INC, newFrameTimerCallback, value + TIME_INC);
 }
 
 
@@ -158,9 +144,12 @@ void RenderScene(void) {
 	glPopMatrix();
 
 	// Draw all of the exist fireworks in the list
-	for (auto it = fireworks.begin(); it != fireworks.end(); ++it) {
-		(*it).draw();
-	}
+	glPushMatrix();
+		glTranslatef(0.0f, 0.0f, -3.0f);
+		for (auto it = fireworks.begin(); it != fireworks.end(); ++it) {
+			(*it).draw();
+		}
+	glPopMatrix();
 
 	// Draw the matrix of balls
 	glPushMatrix();
@@ -170,21 +159,25 @@ void RenderScene(void) {
 		ballMatrix.draw();
 	glPopMatrix();
 
-	// Draw a teapot
-	glPushMatrix(); // Save the matrix state and perform rotations
-		glTranslatef(-380.0f, 250.0f, +50.0f);
-		glRotatef(xRot, 1.0f, 0.0f, 0.0f);
-		glRotatef(yRot, 0.0f, 1.0f, 0.0f);
-		glColor3f(0.0f, 0.5f, 1.0f);
-		// glutWireTeapot(90); // draw a wireframe teapot
-	glPopMatrix(); // Restore the matrix state
+	// Draw the waveform in oscilloscopes
+	if (dataRegister < 16) {
+		glPushMatrix();
+		glTranslatef(-window_width / 2.f, 160.0f, 0.f);
+		glLineWidth(1.5);
+		for (int i = 0; i < 4; ++i) {
+			oscilloscopes[i].draw();
+			glTranslatef(0.f, 48.f, 0.f);
+		}
+		glPopMatrix();
+	}
+
 	glutSwapBuffers();
 }
 int main(int argc, char* argv[]) {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 	glutInitWindowSize(window_width, window_height);
-	glutCreateWindow("Orthogonal Projection");
+	glutCreateWindow("XJTLU 15th Birthday!");
 
 
 	//打开抗锯齿功能
@@ -205,7 +198,7 @@ int main(int argc, char* argv[]) {
 	glutSpecialFunc(specialKeyCallback);
 	glutKeyboardFunc(keyboardCallback);
 	glutDisplayFunc(RenderScene);
-	glutTimerFunc(TIME_INC, newFrameTimerCallback, 1);
+	glutTimerFunc(TIME_INC, newFrameTimerCallback, 0);
 	glutTimerFunc(0, updateMatrixTimerCallback,0);
 
 	srand(time(NULL));//设置随机数种子，使每次产生的随机序列不同

@@ -15,3 +15,4 @@
 #include "Ball.h"
 #include "Firework.h"
 #include "BallMatrix.h"
+#include "Oscilloscope.h"

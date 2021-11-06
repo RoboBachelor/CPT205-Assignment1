@@ -33,6 +33,9 @@
     <ClCompile Include="BallMatrix.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Oscilloscope.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Ball.h">
@@ -54,6 +57,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="matrixWeights.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Oscilloscope.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

@@ -148,6 +148,7 @@
     <ClCompile Include="color.cpp" />
     <ClCompile Include="Firework.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Oscilloscope.cpp" />
     <ClCompile Include="random.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -157,6 +158,7 @@
     <ClInclude Include="Firework.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="matrixWeights.h" />
+    <ClInclude Include="Oscilloscope.h" />
     <ClInclude Include="random.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -10,7 +10,7 @@ public:
 	HSV_t hsv = { 0 };		// Color in HSV color space
 	float luminanceFactor = 1.f;	// Luminance exponential decay factor
 	float alpha = 1.f;				// Luminance
-	int samplingNumber = 50;		// How many vertexes on the circle
+	int samplingNumber = 12;		// How many vertexes on the circle
 	bool deleted = false;	// Lazy delete flag
 
 	// Color for matrix of balls. v[ORANGE]v						v[PURPLE]v
