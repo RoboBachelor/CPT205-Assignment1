@@ -30,7 +30,7 @@
     <ClCompile Include="Firework.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="matrixData.cpp">
+    <ClCompile Include="BallMatrix.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -48,6 +48,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Firework.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BallMatrix.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="matrixWeights.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

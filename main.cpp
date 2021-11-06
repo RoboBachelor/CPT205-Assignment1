@@ -9,6 +9,7 @@
  */
 
 #include "main.h"
+#include "matrixWeights.h"
 
 // Angles of rotation
 static GLfloat xRot = 0.0f;
@@ -17,55 +18,6 @@ static GLfloat yRot = 0.0f;
 static int window_width = 1280, window_height = 720;
 
 std::list<Firework> fireworks;
-extern float weight_xjtlu[][MATRIX_W];
-extern float weight_2006[][MATRIX_W];
-extern float weight_15th[][MATRIX_W];
-
-float weightUpdate(float fdb, float set) {
-	// Update 20 percent of weights only.
-	if (getRand(1000) >= 200) {
-		return fdb;
-	}
-	float err = set - fdb;
-	return fdb + getRandf(1.f) * err;
-}
-
-class BallMatrix {
-public:
-	Ball balls[MATRIX_W][MATRIX_H];
-	float (*target_weight)[MATRIX_W] = weight_2006;
-
-	BallMatrix();
-	void nextState();
-	void draw();
-};
-
-BallMatrix::BallMatrix() {
-	for (int i = 0; i < MATRIX_W; ++i) {
-		for (int j = 0; j < MATRIX_H; ++j) {
-			balls[i][j].setCenter(-495 + i * 10, -175 + j * 10);
-			balls[i][j].setRadius(5.f);
-			balls[i][j].weight = getRandf(2.f) - 1.f;
-		}
-	}
-}
-
-void BallMatrix::nextState(){
-	// Update the next state for the ball matrix
-	for (int i = 0; i < MATRIX_W; ++i) {
-		for (int j = 0; j < MATRIX_H; ++j) {
-			balls[i][j].weight = weightUpdate(balls[i][j].weight, target_weight[MATRIX_H - j - 1][i] * 2.f - 1.f);
-		}
-	}
-}
-
-void BallMatrix::draw() {
-	for (int i = 0; i < MATRIX_W; ++i) {
-		for (int j = 0; j < MATRIX_H; ++j) {
-			balls[i][j].drawForMatrix();
-		}
-	}
-}
 
 BallMatrix ballMatrix;
 
@@ -133,12 +85,32 @@ void specialKeyCallback(int key, int x, int y){
 	glutPostRedisplay();
 }
 
-
 void newFireworkTimerCallback(int value) {
 	// Push back the new firework with random location, color and size into the firework list.
 	fireworks.push_back(Firework(getRand(window_width) - window_width / 2, 60 + getRand(300), 500 + getRand(800), getRand(360)));
 
 	glutTimerFunc(getRand(3000), newFireworkTimerCallback, value + 1);
+}
+
+void updateMatrixTimerCallback(int value) {
+	if (value < 16) {
+		ballMatrix.setTarget( (float(*)[MATRIX_W]) weight_16numbers[MATRIX_H * value]);
+		glutTimerFunc(1500, updateMatrixTimerCallback, value + 1);
+	}
+	if(value == 16) {
+		ballMatrix.negativeWeights = false;
+		ballMatrix.updateRate = 100;
+		glutTimerFunc(0, newFireworkTimerCallback, 1);
+	}
+	if (value >= 16) {
+		if (value & 1) {
+			ballMatrix.setTarget(weight_15th);
+		}
+		else {
+			ballMatrix.setTarget(weight_xjtlu);
+		}
+		glutTimerFunc(4000, updateMatrixTimerCallback, value + 1);
+	}
 }
 
 void newFrameTimerCallback(int value) {
@@ -234,10 +206,7 @@ int main(int argc, char* argv[]) {
 	glutKeyboardFunc(keyboardCallback);
 	glutDisplayFunc(RenderScene);
 	glutTimerFunc(TIME_INC, newFrameTimerCallback, 1);
-	glutTimerFunc(0, newFireworkTimerCallback, 1);
-	//SetupRC();
-
-
+	glutTimerFunc(0, updateMatrixTimerCallback,0);
 
 	srand(time(NULL));//设置随机数种子，使每次产生的随机序列不同
 

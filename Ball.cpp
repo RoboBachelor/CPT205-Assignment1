@@ -69,8 +69,9 @@ void Ball::draw() {
 	glBegin(GL_POLYGON);
 	glColor4f(rgb.r, rgb.g, rgb.b, alpha);
 	// Draw the circle
-	for (float theta = 0; theta < 2 * PI; theta += 0.1f) {
-		glVertex2f(cx + radius * cos(theta), cy + radius * sin(theta));
+	for (int i = 0; i <= samplingNumber; ++i) {
+		glVertex2f(cx + radius * cosf(2 * PI * i / samplingNumber),
+				   cy + radius * sinf(2 * PI * i / samplingNumber));
 	}
 
 	glEnd();
@@ -92,8 +93,9 @@ void Ball::drawForMatrix() {
 	glVertex2f(cx, cy);
 	glColor4f(rgb.r, rgb.g, rgb.b, 0.4f * weight * (weight > 0 ? 1 : -1));
 	// Draw the circle
-	for (float theta = 0; theta < 2 * PI; theta += 0.1f) {
-		glVertex2f(cx + radius * cos(theta), cy + radius * sin(theta));
+	for (int i = 0; i <= samplingNumber; ++i) {
+		glVertex2f(cx + radius * cosf(2 * PI * i / samplingNumber),
+			cy + radius * sinf(2 * PI * i / samplingNumber));
 	}
 
 	glEnd();

@@ -144,17 +144,19 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Ball.cpp" />
+    <ClCompile Include="BallMatrix.cpp" />
     <ClCompile Include="color.cpp" />
     <ClCompile Include="Firework.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="matrixData.cpp" />
     <ClCompile Include="random.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Ball.h" />
+    <ClInclude Include="BallMatrix.h" />
     <ClInclude Include="color.h" />
     <ClInclude Include="Firework.h" />
     <ClInclude Include="main.h" />
+    <ClInclude Include="matrixWeights.h" />
     <ClInclude Include="random.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

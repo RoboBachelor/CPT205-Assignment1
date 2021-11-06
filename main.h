@@ -4,9 +4,6 @@
 #define PI 3.14159265358979323846f
 #define TIME_INC 16
 
-#define MATRIX_W 100
-#define MATRIX_H 36
-
 #include <GL/freeglut.h>
 #include <iostream>
 #include <cmath>
@@ -17,3 +14,4 @@
 #include "random.h"
 #include "Ball.h"
 #include "Firework.h"
+#include "BallMatrix.h"
