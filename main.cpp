@@ -15,7 +15,8 @@
 static GLfloat xRot = 0.0f;
 static GLfloat yRot = 0.0f;
 
-static int window_width = 1280, window_height = 720;
+static int width = 1280, height = 720;
+static int window_w, window_h;
 static int dataRegister = 0;
 
 std::list<Firework> fireworks;
@@ -27,13 +28,15 @@ Oscilloscope oscilloscopes[4];
 void ChangeSize(int w, int h) {
 	if (h == 0) // Avoid division by zero
 		h = 1;
+	window_w = w;
+	window_h = h;
 	// Set viewport to window dimensions
 	glViewport(0, 0, w, h);
 	// Reset coordinate system
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	// Set viewing volume
-	glOrtho(-window_width / 2.f, window_width / 2.f, -window_height / 2.f, window_height / 2.f, -500, 500);
+	glOrtho(-width / 2.f, width / 2.f, -height / 2.f, height / 2.f, -500, 500);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }
@@ -65,9 +68,18 @@ void specialKeyCallback(int key, int x, int y){
 	glutPostRedisplay();
 }
 
+void mouseCallback(int button, int state, int x, int y) {
+	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+		float cx = (float)x / window_w * width - width / 2;
+		float cy = -(float)y / window_h * height + height / 2;
+		// Push back the new firework with random location, color and size into the firework list.
+		fireworks.push_back(Firework(cx, cy, 500 + getRand(800), getRand(360)));
+	}
+}
+
 void newFireworkTimerCallback(int value) {
 	// Push back the new firework with random location, color and size into the firework list.
-	fireworks.push_back(Firework(getRand(window_width) - window_width / 2, 60 + getRand(300), 500 + getRand(800), getRand(360)));
+	fireworks.push_back(Firework(getRand(width) - width / 2, 60 + getRand(300), 500 + getRand(800), getRand(360)));
 
 	glutTimerFunc(getRand(3000), newFireworkTimerCallback, value + 1);
 }
@@ -133,13 +145,13 @@ void RenderScene(void) {
 		glBegin(GL_POLYGON);
 		// Lighter blue
 		glColor3f(0.f, 0.1f, 0.2f);
-		glVertex3f(-window_width / 2.f, -window_height / 2.f, 0.f);
-		glVertex3f(+window_width / 2.f, -window_height / 2.f, 0.f);
+		glVertex3f(-width / 2.f, -height / 2.f, 0.f);
+		glVertex3f(+width / 2.f, -height / 2.f, 0.f);
 
 		// Darker blue
 		glColor3f(0.0f, 0.02f, 0.05f);
-		glVertex3f(+window_width / 2.f, +window_height / 2.f, 0.f);
-		glVertex3f(-window_width / 2.f, +window_height / 2.f, 0.f);
+		glVertex3f(+width / 2.f, +height / 2.f, 0.f);
+		glVertex3f(-width / 2.f, +height / 2.f, 0.f);
 		glEnd();
 	glPopMatrix();
 
@@ -162,7 +174,7 @@ void RenderScene(void) {
 	// Draw the waveform in oscilloscopes
 	if (dataRegister < 16) {
 		glPushMatrix();
-		glTranslatef(-window_width / 2.f, 160.0f, 0.f);
+		glTranslatef(-width / 2.f, 160.0f, 0.f);
 		glLineWidth(1.5);
 		for (int i = 0; i < 4; ++i) {
 			oscilloscopes[i].draw();
@@ -176,7 +188,7 @@ void RenderScene(void) {
 int main(int argc, char* argv[]) {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-	glutInitWindowSize(window_width, window_height);
+	glutInitWindowSize(width, height);
 	glutCreateWindow("XJTLU 15th Birthday!");
 
 
@@ -197,6 +209,7 @@ int main(int argc, char* argv[]) {
 	glutReshapeFunc(ChangeSize);
 	glutSpecialFunc(specialKeyCallback);
 	glutKeyboardFunc(keyboardCallback);
+	glutMouseFunc(mouseCallback);
 	glutDisplayFunc(RenderScene);
 	glutTimerFunc(TIME_INC, newFrameTimerCallback, 0);
 	glutTimerFunc(0, updateMatrixTimerCallback,0);
