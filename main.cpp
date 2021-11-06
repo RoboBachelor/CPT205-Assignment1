@@ -11,16 +11,11 @@
 #include "main.h"
 #include "matrixWeights.h"
 
-// Angles of rotation
-static GLfloat xRot = 0.0f;
-static GLfloat yRot = 0.0f;
-
 static int width = 1280, height = 720;
 static int window_w, window_h;
 static int dataRegister = 0;
 
 std::list<Firework> fireworks;
-
 BallMatrix ballMatrix;
 Oscilloscope oscilloscopes[4];
 
@@ -39,33 +34,6 @@ void ChangeSize(int w, int h) {
 	glOrtho(-width / 2.f, width / 2.f, -height / 2.f, height / 2.f, -500, 500);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-}
-
-void keyboardCallback(unsigned char key, int x, int y) {// keyboard interaction
-	if (key == 'm') {
-		return;
-	}
-	if (key == 'M') {
-		return;
-	}
-	// Refresh the window
-	glutPostRedisplay();
-}
-
-// Respond to arrow keys
-void specialKeyCallback(int key, int x, int y){
-	if (key == GLUT_KEY_UP)
-		xRot -= 5.0f;
-	if (key == GLUT_KEY_DOWN)
-		xRot += 5.0f;
-	if (key == GLUT_KEY_LEFT)
-		yRot -= 5.0f;
-	if (key == GLUT_KEY_RIGHT)
-		yRot += 5.0f;
-	xRot = (GLfloat)((const int)xRot % 360);
-	yRot = (GLfloat)((const int)yRot % 360);
-	// Refresh the window
-	glutPostRedisplay();
 }
 
 void mouseCallback(int button, int state, int x, int y) {
@@ -166,8 +134,6 @@ void RenderScene(void) {
 	// Draw the matrix of balls
 	glPushMatrix();
 		glTranslatef(0.0f, -40.0f, +20.0f);
-		glRotatef(xRot, 1.0f, 0.0f, 0.0f);
-		glRotatef(yRot, 0.0f, 1.0f, 0.0f);
 		ballMatrix.draw();
 	glPopMatrix();
 
@@ -191,30 +157,26 @@ int main(int argc, char* argv[]) {
 	glutInitWindowSize(width, height);
 	glutCreateWindow("XJTLU 15th Birthday!");
 
-
-	//打开抗锯齿功能
-	//1.开启混合功能
+	// Enable anti-aliasing.
 	glEnable(GL_BLEND);
-
-	//2.指定混合因子
-	//注意:如果你修改了混合方程式,当你使用混合抗锯齿功能时,请一定要改为默认混合方程式
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	//3.开启对点\线\多边形的抗锯齿功能
 	glEnable(GL_POINT_SMOOTH);
 	glEnable(GL_LINE_SMOOTH);
 	glEnable(GL_POLYGON_SMOOTH);
 
-
+	// Register the callback functions.
 	glutReshapeFunc(ChangeSize);
-	glutSpecialFunc(specialKeyCallback);
-	glutKeyboardFunc(keyboardCallback);
 	glutMouseFunc(mouseCallback);
 	glutDisplayFunc(RenderScene);
+
+	// Timer for displaying a new frame in period of 16ms (60Hz)
 	glutTimerFunc(TIME_INC, newFrameTimerCallback, 0);
+
+	// Timer for showing the next ball matrix.
 	glutTimerFunc(0, updateMatrixTimerCallback,0);
 
-	srand(time(NULL));//设置随机数种子，使每次产生的随机序列不同
+	// Init the random function.
+	srand(time(NULL));
 
 	glutMainLoop();
 	return 0;
