@@ -13,7 +13,7 @@ public:
 	//bool isFull = false;
 	float horizontalScale = 2.f;
 	float verticalScale = 36.f;
-	float filterCoefficient = 0.9;
+	float filterCoefficient = 1;
 	float lastValue = 0;
 	float backgroundAlpha = 0.05;
 

@@ -13,7 +13,7 @@
 
 static int width = 1280, height = 720;
 static int window_w, window_h;
-static int dataRegister = 0;
+static int dataRegister = -1;
 
 std::list<Firework> fireworks;
 BallMatrix ballMatrix;
@@ -57,9 +57,7 @@ void newFireworkTimerCallback(int value) {
 void updateMatrixTimerCallback(int value) {
 	// Display from 2006 to 2021 on the matrix.
 	if (value < 16) {
-		dataRegister = value;
 		ballMatrix.setTarget( (float(*)[MATRIX_W]) weight_16numbers[MATRIX_H * value]);
-		glutTimerFunc(1500, updateMatrixTimerCallback, value + 1);
 	}
 
 	// Register the firework timer.
@@ -100,10 +98,21 @@ void newFrameTimerCallback(int value) {
 	// Update the next frame of the ball matrix
 	ballMatrix.nextState();
 
-	// Append 4 new values from the data register to the oscilloscopes.
 	if (dataRegister < 16) {
-		for (int i = 0; i < 4; ++i) {
-			oscilloscopes[i].append((dataRegister >> i) & 1);
+		float v[4] = { 0.5f, 0.5f, 0.5f, 0.5f };
+		float t = value / 1500.f / 16;
+		for (int id = 0; id < 4; ++id) {
+			for (int k = 1; k <= 160; k += 1) {
+				for (int i = 1; i <= (2 << id); ++i) {
+					// Fourier Series
+					v[id] += sinf(2 * PI * k * (t - (float)i / (2 << id))) / k / PI * ((i & 1) ? 1 : -1);
+				}
+			}
+			oscilloscopes[3 - id].append(v[id]);
+		}
+
+		if (value >= 1500 * (dataRegister + 1)) {
+			updateMatrixTimerCallback(++dataRegister);
 		}
 	}
 	else {
@@ -188,9 +197,6 @@ int main(int argc, char* argv[]) {
 
 	// Timer for displaying a new frame in period of 16ms (60Hz)
 	glutTimerFunc(TIME_INC, newFrameTimerCallback, 0);
-
-	// Timer for showing the next ball matrix.
-	glutTimerFunc(0, updateMatrixTimerCallback,0);
 
 	// Init the random function.
 	srand(time(NULL));
