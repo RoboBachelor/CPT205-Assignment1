@@ -9,52 +9,52 @@ Oscilloscope::Oscilloscope() {
 }
 
 void Oscilloscope::append(float value) {
-	values[index] = lastValue * (1 - filterCoefficient) + value * filterCoefficient;
-	lastValue = values[index++];
-	if (index >= DATA_LEN) {
-		index = 0;
-		isFull = true;
+	values[endIndex] = lastValue * (1 - filterCoefficient) + value * filterCoefficient;
+	lastValue = values[endIndex++];
+	if (endIndex >= DATA_LEN) {
+		endIndex = 0;
+	}
+	if (len < DATA_LEN) {
+		++len;
+	}
+	if (len == DATA_LEN) {
+		beginIndex = endIndex;
 	}
 	ball.alpha = 0.2 + 0.6 * lastValue;
 }
 
 void Oscilloscope::draw() {
 	glPushMatrix();
-	glTranslatef(0, 0, -1);
-	glBegin(GL_POLYGON);
-	glColor4f(1, 1, 1, backgroundAlpha);
-	glVertex2f(0, 0);
-	glVertex2f(0, verticalScale);
-	if (isFull) {
-		glVertex2f(horizontalScale * DATA_LEN, verticalScale);
-		glVertex2f(horizontalScale * DATA_LEN, 0);
-		ball.setCenter(horizontalScale * DATA_LEN - verticalScale * 0.5, verticalScale * 0.5);
-	}
-	else {
-		glVertex2f(horizontalScale * index, verticalScale);
-		glVertex2f(horizontalScale * index, 0);
-		ball.setCenter(horizontalScale * index - verticalScale * 0.5, verticalScale * 0.5);
-	}
-	glEnd();
-	glTranslatef(0, 0, 0.5);
-	ball.draw();
+		glTranslatef(0, 0, -1);
+		glBegin(GL_POLYGON);
+		glColor4f(1, 1, 1, backgroundAlpha);
+		glVertex2f(0, 0);
+		glVertex2f(0, verticalScale);
+		glVertex2f(horizontalScale * len, verticalScale);
+		glVertex2f(horizontalScale * len, 0);
+		glEnd();
+		glTranslatef(0, 0, 0.5);
+		ball.setCenter(horizontalScale * len - verticalScale * 0.5, verticalScale * 0.5);
+		ball.draw();
 	glPopMatrix();
 
 	glBegin(GL_LINE_STRIP);
 	glColor3f(0, 0.5, 1);
-	if (isFull) {
-		int readIndex = index;
-		for (int i = 0; i < DATA_LEN; ++i) {
-			glVertex2f(i * horizontalScale, values[readIndex++] * verticalScale);
-			if (readIndex >= DATA_LEN) {
-				readIndex = 0;
-			}
+
+	int readIndex = beginIndex;
+	for (int i = 0; i < len; ++i) {
+		glVertex2f(i * horizontalScale, values[readIndex] * verticalScale);
+		if (++readIndex == DATA_LEN) {
+			readIndex = 0;
 		}
 	}
-	else {
-		for (int i = 0; i < index; ++i) {
-			glVertex2f(i * horizontalScale, values[i] * verticalScale);
-		}
-	}
+
 	glEnd();
+}
+
+void Oscilloscope::popHistoryValue() {
+	if (++beginIndex >= DATA_LEN) {
+		beginIndex -= DATA_LEN;
+	}
+	--len;
 }

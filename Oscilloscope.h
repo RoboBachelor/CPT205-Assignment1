@@ -7,8 +7,10 @@
 class Oscilloscope {
 public:
 	float values[DATA_LEN] = { 0 };
-	int index = 0;
-	bool isFull = false;
+	int beginIndex = 0;
+	int endIndex = 0;
+	int len = 0;
+	//bool isFull = false;
 	float horizontalScale = 2.f;
 	float verticalScale = 36.f;
 	float filterCoefficient = 0.9;
@@ -20,4 +22,5 @@ public:
 	Oscilloscope();
 	void append(float value);
 	void draw();
+	void popHistoryValue();
 };

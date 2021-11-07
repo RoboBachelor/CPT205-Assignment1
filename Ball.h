@@ -26,5 +26,4 @@ public:
 	void nextState(void);
 	void draw(void);
 	void drawForMatrix(void);
-
 };

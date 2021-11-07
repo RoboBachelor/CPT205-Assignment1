@@ -65,7 +65,6 @@ void updateMatrixTimerCallback(int value) {
 	// Register the firework timer.
 	// Slowdown the dancing speed of the matrix.
 	if(value == 16) {
-		dataRegister = value;
 		ballMatrix.negativeWeights = false;
 		ballMatrix.updateRate = 100;
 		glutTimerFunc(0, newFireworkTimerCallback, 1);
@@ -80,6 +79,7 @@ void updateMatrixTimerCallback(int value) {
 		else {
 			ballMatrix.setTarget(weight_xjtlu);
 		}
+		dataRegister = value;
 		glutTimerFunc(4000, updateMatrixTimerCallback, value + 1);
 	}
 }
@@ -101,8 +101,15 @@ void newFrameTimerCallback(int value) {
 	ballMatrix.nextState();
 
 	// Append 4 new values from the data register to the oscilloscopes.
-	for (int i = 0; i < 4; ++i) {
-		oscilloscopes[i].append((dataRegister >> i) & 1);
+	if (dataRegister < 16) {
+		for (int i = 0; i < 4; ++i) {
+			oscilloscopes[i].append((dataRegister >> i) & 1);
+		}
+	}
+	else {
+		for (int i = 0; i < 4; ++i) {
+			oscilloscopes[i].popHistoryValue();
+		}
 	}
 
 	glutPostRedisplay(); // force OpenGL to redraw the current window
@@ -148,7 +155,7 @@ void RenderScene(void) {
 	glPopMatrix();
 
 	// Draw the waveform in oscilloscopes
-	if (dataRegister < 16) {
+	if (dataRegister < 50) {
 		glPushMatrix();
 		glTranslatef(-width / 2.f, 160.0f, 0.f);
 		glLineWidth(1.5);
