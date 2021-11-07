@@ -99,23 +99,26 @@ void newFrameTimerCallback(int value) {
 	ballMatrix.nextState();
 
 	if (dataRegister < 16) {
+		// Append the fourier series in first stage.
 		float v[4] = { 0.5f, 0.5f, 0.5f, 0.5f };
 		float t = value / 1500.f / 16;
 		for (int id = 0; id < 4; ++id) {
 			for (int k = 1; k <= 160; k += 1) {
 				for (int i = 1; i <= (2 << id); ++i) {
-					// Fourier Series
+					// Fourier Series formula
 					v[id] += sinf(2 * PI * k * (t - (float)i / (2 << id))) / k / PI * ((i & 1) ? 1 : -1);
 				}
 			}
 			oscilloscopes[3 - id].append(v[id]);
 		}
 
+		// Call this callback to update the ball matrix.
 		if (value >= 1500 * (dataRegister + 1)) {
 			updateMatrixTimerCallback(++dataRegister);
 		}
 	}
 	else {
+		// Pop the history values of oscilloscopes so the waveforms move left.
 		for (int i = 0; i < 4; ++i) {
 			oscilloscopes[i].popHistoryValue();
 		}
@@ -164,7 +167,7 @@ void RenderScene(void) {
 	glPopMatrix();
 
 	// Draw the waveform in oscilloscopes
-	if (dataRegister < 50) {
+	if (dataRegister < 20) {
 		glPushMatrix();
 		glTranslatef(-width / 2.f, 160.0f, 0.f);
 		glLineWidth(1.5);
